@@ -11,6 +11,7 @@ import (
 // app, so that each change reaches the native menu without rebuilding it.
 type trayMenu struct {
 	now, toggle, prev, next       *mygo.MenuItem
+	dislike, revealTrack          *mygo.MenuItem
 	search                        *mygo.MenuItem
 	seq, shuffle, one             *mygo.MenuItem
 	path, include, choose, reveal *mygo.MenuItem
@@ -20,7 +21,14 @@ type trayMenu struct {
 func (a *app) buildMenu() *mygo.Menu {
 	L := current()
 	m := &trayMenu{
-		now: &mygo.MenuItem{ID: "now", Disabled: true},
+		dislike: &mygo.MenuItem{ID: "dislike", Label: L.Dislike, Click: func(*mygo.MenuItem, *mygo.Window) {
+			a.dislike()
+		}},
+		revealTrack: &mygo.MenuItem{ID: "reveal.track", Label: L.Reveal, Click: func(*mygo.MenuItem, *mygo.Window) {
+			if p := a.currentPath(); p != "" {
+				mygo.Shell.ShowItemInFolder(p)
+			}
+		}},
 		toggle: &mygo.MenuItem{ID: "toggle", Accelerator: a.p.PlayPause, Click: func(*mygo.MenuItem, *mygo.Window) {
 			a.toggle()
 		}},
@@ -62,6 +70,9 @@ func (a *app) buildMenu() *mygo.Menu {
 	m.seq.Label, m.shuffle.Label, m.one.Label = L.Sequential, L.Shuffle, L.One
 
 	a.trayMenu = m
+	// The track row opens a submenu: what acts on the track sits under its
+	// name, where a slip of the mouse does not reach Play/Pause.
+	m.now = &mygo.MenuItem{ID: "now", Submenu: []*mygo.MenuItem{m.dislike, m.revealTrack}}
 	menu := mygo.NewMenu([]*mygo.MenuItem{
 		m.now,
 		mygo.Separator(),
@@ -130,6 +141,9 @@ func (a *app) syncMenu() {
 	}
 	m.toggle.SetLabel(label)
 	m.toggle.SetEnabled(!empty)
+	m.now.SetEnabled(!empty)
+	m.dislike.SetEnabled(!empty)
+	m.revealTrack.SetEnabled(!empty)
 	m.prev.SetLabel(L.Previous)
 	m.prev.SetEnabled(!empty)
 	m.next.SetLabel(L.Next)

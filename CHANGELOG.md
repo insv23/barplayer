@@ -16,6 +16,10 @@ English · [简体中文](CHANGELOG_zh.md)
 - The menu shows each control's global shortcut on the right.
 - A reset button left of each shortcut in the settings window, which puts that one back to the default (`⌥P`, `⌥[`, `⌥]`, `⌥\`). It shows while the row differs from the default.
 - Hover tooltips on the reset and clear buttons beside a shortcut, saying what each one does.
+- **Dislike**: the track row now opens a submenu, and its first item moves the track that plays into `_dislike` at the top of the library folder. The list moves on without it and nothing is deleted: dragging the file back into the library makes it a track again. It sits one level down, where a slip of the mouse stays clear of Play / Pause.
+- Dislike keeps the playback the user asked for: a track that was heard gives way to the next one in the list, and a paused one leaves the list without starting anything. A move that fails (read-only folder, no permission) says so in a dialog and leaves playback and the list as they were. A track inside a subfolder lands at the top level too, and a name already taken becomes `track (2).mp3`.
+- Reveal in Finder, in the same submenu, goes to the file of the track that plays.
+- The scan and the file watch skip `_dislike`, so changes inside it leave the list still, and a track put there does not come back.
 
 ## [0.1.0] - 2026-11-07
 

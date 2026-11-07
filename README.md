@@ -20,6 +20,8 @@ English · [简体中文](README_zh.md)
 
 Play / Pause, Previous, Next and Search show their global shortcut on the right, drawn by macOS (`⌥P`, `⌥[`, `⌥]`, `⌥\`). A shortcut left empty shows nothing there.
 
+The first row names the track that plays, with its place in the list under it. That row opens a submenu: **Dislike** and **Reveal in Finder**. Both act on the track that plays, and neither sits where a slip of the mouse reaches Play / Pause.
+
 ### Search window
 
 The window under **Search…** lists the whole folder. It opens with the field focused and the list at the track that plays, and it stays open: closing it hides it, and the app keeps running in the menu bar.
@@ -37,7 +39,8 @@ The window under **Search…** lists the whole folder. It opens with the field f
 - Sorted by full path, so the tracks of one subfolder stay together.
 - **Include Subfolders** is off by default: on, it walks the folders inside and watches them too; off, only the top level counts.
 - Watching uses FSEvents (`mygo.WatchFiles`). Events are coalesced for 50 ms before they arrive, and each batch rereads the folder. Rereading 214 files costs far less than keeping an incremental diff.
-- Files and folders whose names start with a dot are ignored.
+- Files and folders whose names start with a dot are ignored, and so is `_dislike`.
+- **Dislike** moves the track that plays into `_dislike` at the top of the library folder, and the list moves on without it. Nothing is deleted: the files sit there in Finder, and dragging one back into the library makes it a track again. A track that was heard gives way to the next one; a paused one leaves the list without starting anything.
 - When the folder is renamed or deleted the watch ends and the menu says **Folder unavailable**; pick the folder again.
 
 ## Settings

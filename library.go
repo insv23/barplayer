@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"os"
 	"path"
@@ -23,6 +24,41 @@ func hasAudioExt(name string) bool {
 	return audioExt[strings.ToLower(filepath.Ext(name))]
 }
 
+// dislikeDir is where Dislike puts a track: inside the library folder, out of
+// the scan, and visible in Finder, so a track comes back by dragging it out.
+const dislikeDir = "_dislike"
+
+// ignoredEntry reports the names the library leaves out: the hidden entries
+// macOS and other apps keep, and the dislike folder.
+func ignoredEntry(name string) bool {
+	return strings.HasPrefix(name, ".") || name == dislikeDir
+}
+
+// moveToDislike moves a track into the dislike folder of the library, naming
+// it apart from the tracks already there. The path is on the same volume, so
+// a track the player has open moves without complaint.
+func moveToDislike(folder, track string) (string, error) {
+	dir := filepath.Join(folder, dislikeDir)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return "", err
+	}
+	base, ext := filepath.Base(track), filepath.Ext(track)
+	target := filepath.Join(dir, base)
+	for n := 2; ; n++ {
+		if _, err := os.Lstat(target); os.IsNotExist(err) {
+			break
+		}
+		if n > 999 {
+			return "", fmt.Errorf("%s: too many tracks of that name", base)
+		}
+		target = filepath.Join(dir, fmt.Sprintf("%s (%d)%s", strings.TrimSuffix(base, ext), n, ext))
+	}
+	if err := os.Rename(track, target); err != nil {
+		return "", err
+	}
+	return target, nil
+}
+
 // scanLibrary lists the audio files of folder, sorted by path so that a
 // folder's tracks stay together. With sub, it walks the folders inside.
 func scanLibrary(folder string, sub bool) ([]string, error) {
@@ -35,7 +71,7 @@ func scanLibrary(folder string, sub bool) ([]string, error) {
 			if p == folder {
 				return nil
 			}
-			if strings.HasPrefix(d.Name(), ".") {
+			if ignoredEntry(d.Name()) {
 				if d.IsDir() {
 					return fs.SkipDir
 				}
@@ -55,7 +91,7 @@ func scanLibrary(folder string, sub bool) ([]string, error) {
 			return nil, err
 		}
 		for _, e := range entries {
-			if e.IsDir() || strings.HasPrefix(e.Name(), ".") || !hasAudioExt(e.Name()) {
+			if e.IsDir() || ignoredEntry(e.Name()) || !hasAudioExt(e.Name()) {
 				continue
 			}
 			files = append(files, filepath.Join(folder, e.Name()))
@@ -132,7 +168,7 @@ func (a *app) watchFolder() {
 	w, err := mygo.WatchFiles(ctx, a.p.Folder, mygo.FileWatchOptions{
 		Recursive: a.p.Subfolders,
 		Ignore: func(p string, isDir bool) bool {
-			return strings.HasPrefix(path.Base(p), ".")
+			return ignoredEntry(path.Base(p))
 		},
 	})
 	if err != nil {

@@ -16,6 +16,7 @@ type text struct {
 	Library, NoFolder, Unavailable  string
 	Include, Choose, Reveal         string
 	Search, NoMatch, NoTracks       string
+	Dislike, DislikeFailed          string
 	Settings, Quit                  string
 	NothingPlaying                  string
 	Language, FollowSystem          string
@@ -33,6 +34,7 @@ var english = text{
 	Library: "Library", NoFolder: "No folder chosen", Unavailable: "Folder unavailable",
 	Include: "Include Subfolders", Choose: "Choose Folder…", Reveal: "Reveal in Finder",
 	Search: "Search", NoMatch: "No track matches", NoTracks: "No tracks in this folder",
+	Dislike: "Dislike", DislikeFailed: "Could not move this track",
 	Settings: "Settings", Quit: "Quit",
 	NothingPlaying: "Not playing",
 	Language:       "Language", FollowSystem: "System",
@@ -54,6 +56,7 @@ var chinese = text{
 	Library: "曲库", NoFolder: "未选择文件夹", Unavailable: "文件夹不可用",
 	Include: "包含子文件夹", Choose: "选择文件夹…", Reveal: "在 Finder 中显示",
 	Search: "搜索", NoMatch: "没有匹配的曲目", NoTracks: "文件夹里没有曲目",
+	Dislike: "不喜欢", DislikeFailed: "无法移动这首曲目",
 	Settings: "设置", Quit: "退出",
 	NothingPlaying: "未在播放",
 	Language:       "语言", FollowSystem: "跟随系统",

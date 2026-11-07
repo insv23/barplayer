@@ -103,6 +103,30 @@ func (a *app) previous() {
 	a.refresh()
 }
 
+// dislike moves the track that plays into the library's dislike folder and
+// takes it off the list. Playback follows what the user asked for: a track
+// that was heard gives way to the next one, and a paused one leaves the list
+// without starting anything.
+func (a *app) dislike() {
+	track := a.currentPath()
+	if track == "" {
+		return
+	}
+	audible := a.playing
+	if _, err := moveToDislike(a.p.Folder, track); err != nil {
+		mygo.Dialog.Error(current().DislikeFailed, err.Error())
+		return
+	}
+	a.stopPlayer()
+	a.loadLibrary() // the track is gone: the list moves on to the one after it
+	if !audible {
+		return
+	}
+	if path := a.currentPath(); path != "" && !a.playPath(path) {
+		a.advance(false)
+	}
+}
+
 // advance moves to the next track. auto is true when the current track
 // ended, which is the only case that Repeat One repeats.
 func (a *app) advance(auto bool) {
