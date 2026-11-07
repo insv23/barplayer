@@ -1,0 +1,6 @@
+{
+  "name": "Barplayer",
+  "identifier": "dev.tony.barplayer",
+  "version": "0.1.0",
+  "out": "build"
+}

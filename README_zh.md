@@ -1,0 +1,118 @@
+# Barplayer
+
+一个播放本地音乐文件夹的 macOS 菜单栏音乐播放器
+
+基于 [MyGo](https://mygo.egoist.dev/)（native UI，无 webview、无 cgo），编译出来是一个几 MB 的二进制，不占 Dock，也没有主窗口。
+
+[English](README.md) · 简体中文
+
+## 它解决什么
+
+- 音乐就放在本地文件夹里，不想为了听歌维护一个资料库。
+- 文件夹内加一首、删一首，播放列表自己跟上（文件监视，不是定时扫描）。
+- 菜单栏点两下就能切歌，不用把窗口翻出来。
+- 键盘上的媒体键、控制中心、全局快捷键都能用，写东西的时候不用切应用。
+
+## 界面
+
+![中文菜单：正在播放「朴树 - 傲慢的上校」，第 132 / 193 首](assets/menu-zh.png)
+
+
+## 曲库
+
+- 只认这些扩展名：`.mp3` `.flac` `.m4a` `.aac` `.ogg` `.oga` `.wav`。
+- 排序按完整路径，所以同一个子文件夹的歌自然连在一起。
+- 「包含子文件夹」默认**关闭**：打开后递归扫描并递归监视，关掉后只看顶层。
+- 监视用 FSEvents（`mygo.WatchFiles`），事件攒 50ms 后合并上报，收到就重扫一遍目录。214 首的重扫成本远低于做增量 diff。
+- 以点开头的文件和文件夹一律忽略。
+- 文件夹被改名或删除时，监视流结束，菜单显示「文件夹不可用」，重新选一次即可。
+
+## 设置
+
+窗口里只有四项，不重复菜单里的东西：
+
+| 项 | 说明 |
+| --- | --- |
+| 语言 | 跟随系统 / 简体中文 / English，切换即时生效，选择被系统记住 |
+| 快捷键 | 播放暂停、上一首、下一首，点框录制、`Esc` 取消、`⌫` 置空、右侧圆圈清空 |
+| 登录时启动 | 默认关。macOS 13+ 需要打包后的 app，`go tool mygo dev` 下无效 |
+| 在菜单栏显示曲目名 | 默认关。打开后图标右边显示当前曲名，超过 24 字截断 |
+
+默认快捷键：`⌥P` 播放/暂停、`⌥[` 上一首、`⌥]` 下一首。录制时先注销旧的全局快捷键，避免按下去同时触发播放；与系统或其他 app 冲突时保留旧值并在窗口里提示。
+
+## 下载与安装
+
+仅 Apple Silicon，要求 macOS 12 或更高。
+
+1. 从 [最新版本](https://github.com/insv23/barplayer/releases/latest/download/barplayer-0.1.0-arm64.dmg) 下载磁盘映像。
+2. 打开后把 **Barplayer** 拖进 `/Applications`。
+3. 对照 Release 里公布的校验和检查下载：
+
+   ```sh
+   shasum -a 256 ~/Downloads/barplayer-0.1.0-arm64.dmg
+   ```
+
+   结果要和 `barplayer-0.1.0-arm64.dmg.sha256` 里的值一致。
+
+4. **这个 app 没有用 Developer ID 签名，也没有公证**，所以 macOS 会隔离它，首次启动会被拒绝。执行一次下面这条去掉隔离标记：
+
+   ```sh
+   xattr -dr com.apple.quarantine /Applications/Barplayer.app
+   ```
+
+5. 启动后菜单栏出现一个音符图标；打开 **曲库 ▸ 选择文件夹…**，选你放音乐的那个文件夹。
+
+`xattr` 那条命令给整个 `.app` 包去掉隔离标记。只对从本仓库下载、且校验和一致的那份执行。
+
+## 运行
+
+```sh
+# 开发
+go tool mygo dev
+
+# 打包：build/Barplayer.app 和一个 .dmg
+go tool mygo build
+```
+
+首次构建会下载 Go 1.27.3 工具链（`go.mod` 里写了版本，Go 自己切换）和依赖。
+
+## 依赖与版本
+
+`go.mod` 里的 MyGo 是 **main 分支的伪版本**（`v0.8.4-0.2026...`），不是 v0.8.3 发布版：发布版只带 `audio/mp3` 和 `audio/vorbis`，没有 `audio/flac`、`audio/aac`、`audio/mp4`，而这台机器的曲库里有一半是 flac。等上游发布包含这些包的版本后，换成正式 tag 即可。
+
+`audio/aac` 是 **LGPL 2.1**（框架本体是 MIT），用来解 `.m4a` 里的 AAC-LC 和 ADTS `.aac`。不需要的话删掉 `player.go` 里那一行空导入，代价是这几个文件播不了（ALAC 仍由 `audio/mp4` 内置支持）。
+
+## 数据
+
+| 文件 | 内容 |
+| --- | --- |
+| `~/Library/Application Support/Barplayer/prefs.json` | 曲库路径、播放顺序、包含子文件夹、菜单栏曲名、语言、三个快捷键 |
+| `~/Library/Application Support/Barplayer/window-state.json` | 设置窗口的位置和尺寸 |
+
+开发运行和打包版共用这一份（`main.go` 里调了 `SetName("Barplayer")`）。想重置就删掉 `prefs.json`。
+
+## 已知限制
+
+- **没有标签解析**：曲名就是文件名去掉扩展名（`Artist - Title.mp3` → `Artist - Title`）。MyGo 不解码 ID3。
+- **没有音量条**：菜单项放不下滑杆，系统音量键已经够用；app 内再乘一层音量会出现「两个音量」。
+- **没有封面和进度**：同上，NSMenu 只有文字、副标题、16pt 图标、勾选和快捷键提示。
+- **切歌有约 100ms 间隙**：每首新开一个 player，没有预加载和淡入淡出。
+- **菜单项不显示快捷键**：挂了 `Accelerator` 会和全局快捷键双触发（一次按键执行两次），所以快捷键只在设置窗口里看。
+- **HE-AAC（AAC+）解不了**，这类文件会被跳过。
+- 未完成的下载文件（写了一半的 mp3）打开失败时会跳下一首，不会卡住。
+
+## 文件
+
+| 文件 | 职责 |
+| --- | --- |
+| `main.go` | app 状态、启动装配（托盘、窗口、媒体键、快捷键）、托盘图标、退出清理 |
+| `player.go` | 播放/暂停、洗牌队列、历史栈、上下一首、单曲循环 |
+| `library.go` | 扫描、文件监视、曲库变化后的续播 |
+| `menu.go` | 托盘菜单构建与增量更新、菜单栏标题、应用菜单栏 |
+| `settings.go` | 设置窗口、快捷键录制、语言切换、登录启动、选文件夹 |
+| `prefs.go` | 偏好的读写（空快捷键是合法值，用指针解码区分「没设置」和「设成空」） |
+| `i18n.go` | 中英两张字符串表 |
+| `keys.go` | 键名映射（`ui.Key` 优先、`ui.KeyCode` 兜底）、accelerator 拼接、macOS 符号显示 |
+| `mygo.json` | 应用名、identifier、版本、打包输出目录 |
+
+测试清单见 [TESTING.md](TESTING.md)。
