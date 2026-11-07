@@ -11,6 +11,7 @@ import (
 // app, so that each change reaches the native menu without rebuilding it.
 type trayMenu struct {
 	now, toggle, prev, next       *mygo.MenuItem
+	search                        *mygo.MenuItem
 	seq, shuffle, one             *mygo.MenuItem
 	path, include, choose, reveal *mygo.MenuItem
 	settings                      *mygo.MenuItem
@@ -20,14 +21,17 @@ func (a *app) buildMenu() *mygo.Menu {
 	L := current()
 	m := &trayMenu{
 		now: &mygo.MenuItem{ID: "now", Disabled: true},
-		toggle: &mygo.MenuItem{ID: "toggle", Click: func(*mygo.MenuItem, *mygo.Window) {
+		toggle: &mygo.MenuItem{ID: "toggle", Accelerator: a.p.PlayPause, Click: func(*mygo.MenuItem, *mygo.Window) {
 			a.toggle()
 		}},
-		prev: &mygo.MenuItem{ID: "previous", Click: func(*mygo.MenuItem, *mygo.Window) {
+		prev: &mygo.MenuItem{ID: "previous", Accelerator: a.p.Previous, Click: func(*mygo.MenuItem, *mygo.Window) {
 			a.previous()
 		}},
-		next: &mygo.MenuItem{ID: "next", Click: func(*mygo.MenuItem, *mygo.Window) {
+		next: &mygo.MenuItem{ID: "next", Accelerator: a.p.Next, Click: func(*mygo.MenuItem, *mygo.Window) {
 			a.next()
+		}},
+		search: &mygo.MenuItem{ID: "search", Label: L.Search + "…", Click: func(*mygo.MenuItem, *mygo.Window) {
+			a.openSearch()
 		}},
 		seq: &mygo.MenuItem{ID: "order.sequential", Type: mygo.MenuItemRadio, Click: func(*mygo.MenuItem, *mygo.Window) {
 			a.setOrder(orderSequential)
@@ -64,6 +68,7 @@ func (a *app) buildMenu() *mygo.Menu {
 		m.toggle,
 		m.prev,
 		m.next,
+		m.search,
 		mygo.Separator(),
 		{Label: L.Order, Submenu: []*mygo.MenuItem{m.seq, m.shuffle, m.one}},
 		{Label: L.Library, Submenu: []*mygo.MenuItem{
@@ -129,6 +134,15 @@ func (a *app) syncMenu() {
 	m.prev.SetEnabled(!empty)
 	m.next.SetLabel(L.Next)
 	m.next.SetEnabled(!empty)
+	m.search.SetEnabled(!empty)
+
+	// The shortcuts show beside the four, as macOS draws them, and go away
+	// when one is cleared. A menu does not answer them while it is open:
+	// macOS runs its own loop then and holds back the global shortcuts too.
+	m.toggle.SetAccelerator(a.p.PlayPause)
+	m.prev.SetAccelerator(a.p.Previous)
+	m.next.SetAccelerator(a.p.Next)
+	m.search.SetAccelerator(a.p.Search)
 
 	m.seq.SetChecked(a.p.Order == orderSequential)
 	m.shuffle.SetChecked(a.p.Order == orderShuffle)

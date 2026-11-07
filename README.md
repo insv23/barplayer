@@ -2,7 +2,7 @@
 
 A macOS menu bar player for one folder of local music.
 
-Built with [MyGo](https://mygo.egoist.dev/) (native UI, no webview, no cgo): a few megabytes of binary, no Dock icon, no main window.
+Built with [MyGo](https://mygo.egoist.dev/) (native UI, no webview, no cgo): a few megabytes of binary, no Dock icon, and no window until you open one.
 
 English · [简体中文](README_zh.md)
 
@@ -11,11 +11,25 @@ English · [简体中文](README_zh.md)
 - The music sits in a folder. No library to maintain.
 - Add a file or delete one and the playlist follows by itself (file watching, not polling).
 - Two clicks in the menu bar change the track, without digging a window out.
+- When the next-track button is not enough, **Search…** opens a list of every track with the cursor in a search field: type part of a name, or scroll and click one.
 - The keyboard's media keys, Control Center and global shortcuts all work, so writing something does not mean switching apps.
 
 ## Interface
 
 ![English menu: playing "Marino - Devil In Disguise", track 27 of 193](assets/menu-en.png)
+
+Play / Pause, Previous, Next and Search show their global shortcut on the right, drawn by macOS (`⌥P`, `⌥[`, `⌥]`, `⌥\`). A shortcut left empty shows nothing there.
+
+### Search window
+
+The window under **Search…** lists the whole folder. It opens with the field focused and the list at the track that plays, and it stays open: closing it hides it, and the app keeps running in the menu bar.
+
+- Matching is a case-insensitive substring of the track name, filtered as you type.
+- A click plays a track at once; `↩` in the field plays the highlighted row, the first match.
+- With the field empty the highlight follows the track that plays, from the menu's next and previous too. Once a query is typed, the highlight is yours.
+- Tracks inside a subfolder show the folder under the name, so two files of the same name tell apart.
+- The field keeps the keyboard after a click, so typing always filters.
+- `⌘W` or the close button hides the window; the shortcut opens it again, and hides it again while it shows.
 
 ## Library
 
@@ -33,11 +47,11 @@ The window holds four things, none of them repeating the menu:
 | Item | What it does |
 | --- | --- |
 | Language | System / 简体中文 / English. The switch applies at once, and the system remembers the choice |
-| Shortcuts | Play/pause, previous, next: click a field to record, `Esc` cancels, `⌫` clears, and so does the circle on the right |
+| Shortcuts | Play/pause, previous, next, search: click a field to record, `Esc` cancels, `⌫` clears, and so does the circle on the right |
 | Start at login | Off by default. macOS 13 and later needs a packaged app; under `go tool mygo dev` it does nothing |
 | Show track name in the menu bar | Off by default. On, the title sits beside the icon, cut at 24 characters |
 
-Defaults: `⌥P` play/pause, `⌥[` previous, `⌥]` next. While recording, the app unregisters its global shortcuts first, so pressing a combination it already holds does not also play or change track. A combination the system or another app holds keeps the old value and shows a message in the window.
+Defaults: `⌥P` play/pause, `⌥[` previous, `⌥]` next, `⌥\` search. While recording, the app unregisters its global shortcuts first, so pressing a combination it already holds does not also play or change track. A combination the system or another app holds keeps the old value and shows a message in the window. `⌘W` hides the window frontmost, as its close button does.
 
 ## Download and install
 
@@ -88,18 +102,19 @@ The MyGo in `go.mod` is a **pseudo-version of `main`** (`v0.8.4-0.2026...`), not
 
 | File | Contents |
 | --- | --- |
-| `~/Library/Application Support/Barplayer/prefs.json` | Library folder, play order, include subfolders, menu bar title, language, the three shortcuts |
-| `~/Library/Application Support/Barplayer/window-state.json` | Position and size of the settings window |
+| `~/Library/Application Support/Barplayer/prefs.json` | Library folder, play order, include subfolders, menu bar title, language, the four shortcuts |
+| `~/Library/Application Support/Barplayer/window-state.json` | Position and size of the settings window and the library window |
 
 Development runs and packaged builds share these files (`main.go` calls `SetName("Barplayer")`). Delete `prefs.json` to start over.
 
 ## Known limits
 
 - **No tag reading**: a track's name is its file name without the extension (`Artist - Title.mp3` → `Artist - Title`). MyGo decodes no ID3.
+- **Search matches names only**: a case-insensitive substring of the file name, so `Bjork` does not find `Björk`, and the subfolder or tag fields are not searched.
 - **No volume slider**: a menu item cannot hold one, the system volume keys already do the job, and a second gain inside the app would give you two volumes.
 - **No artwork and no progress**: NSMenu holds text, a subtitle, a 16pt icon, checks and key hints, and nothing else.
 - **About 100 ms between tracks**: each track opens its own player, with no preloading and no crossfade.
-- **Menu items show no key equivalents**: setting `Accelerator` would fire twice for one press, since the global shortcut fires too, so the shortcuts live in the settings window only.
+- **Shortcuts do nothing while the tray menu is open**: macOS runs its own loop for an open menu, and delivers neither a global hot key nor a status menu's key equivalents to the app. They answer again once it closes.
 - **HE-AAC (AAC+) does not decode**, and those files get skipped.
 - A download that is still being written fails to open, and the player moves to the next track instead of getting stuck.
 
@@ -111,6 +126,7 @@ Development runs and packaged builds share these files (`main.go` calls `SetName
 | `player.go` | Play/pause, shuffle queue, history, next and previous, Repeat One |
 | `library.go` | Scanning, watching, carrying playback across library changes |
 | `menu.go` | Tray menu construction and updates, menu bar title, application menu |
+| `search.go` | The library window: filtering by name, the rows, playing a row |
 | `settings.go` | Settings window, shortcut recording, language, start at login, choosing the folder |
 | `prefs.go` | Reading and writing preferences (an empty shortcut is a value of its own, so decoding uses pointers) |
 | `i18n.go` | The two string tables |

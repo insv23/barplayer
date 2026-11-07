@@ -11,11 +11,17 @@ import (
 // button of macOS fields.
 var clearIcon = ui.MustParseSVG([]byte(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>`))
 
-// settingsView is the one window of the app: language, the three shortcuts,
+// settingsView is the one window of the app: language, the four shortcuts,
 // and the two general switches, each as a row with its label on the left.
 func (a *app) settingsView(c *ui.Context) {
 	L := current()
 	t := c.Theme()
+
+	// Cmd+W hides the window, as the close button does. A key press recorded
+	// as a shortcut stays a shortcut.
+	if a.recording < 0 {
+		c.OnShortcut(ui.Cmd, ui.KeyW, a.win.Hide)
+	}
 
 	// The keys held are a fallback for a press that comes before the row has
 	// the keyboard: the window reports them whichever element has the focus.
@@ -39,6 +45,7 @@ func (a *app) settingsView(c *ui.Context) {
 			a.shortcutRow(c, 0, L.PlayPause, a.p.PlayPause)
 			a.shortcutRow(c, 1, L.Previous, a.p.Previous)
 			a.shortcutRow(c, 2, L.Next, a.p.Next)
+			a.shortcutRow(c, 3, L.Search, a.p.Search)
 			if a.shortcutErr != "" {
 				ui.Text(c, a.shortcutErr).FontSize(11).TextColor(t.Danger)
 			}
@@ -215,7 +222,7 @@ func (a *app) captureInput(ev ui.InputEvent) {
 }
 
 func (a *app) shortcutList() []string {
-	return []string{a.p.PlayPause, a.p.Previous, a.p.Next}
+	return []string{a.p.PlayPause, a.p.Previous, a.p.Next, a.p.Search}
 }
 
 // setShortcut binds one row, or clears it with "". A combination another row
@@ -244,11 +251,12 @@ func (a *app) setShortcut(i int, acc string) {
 	}
 	a.shortcutErr = ""
 	a.p.PlayPause, a.p.Previous, a.p.Next = next[0], next[1], next[2]
+	a.p.Search = next[3]
 	a.savePrefs()
 	a.refresh()
 }
 
-// bindShortcuts registers the three shortcuts, and says what went wrong when
+// bindShortcuts registers the four shortcuts, and says what went wrong when
 // one is taken.
 func (a *app) bindShortcuts(list []string) string {
 	mygo.GlobalShortcut.UnregisterAll()
@@ -259,6 +267,7 @@ func (a *app) bindShortcuts(list []string) string {
 		{list[0], a.toggle},
 		{list[1], a.previous},
 		{list[2], a.next},
+		{list[3], a.toggleSearch},
 	}
 	for _, e := range entries {
 		if e.acc == "" {

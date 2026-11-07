@@ -92,6 +92,7 @@ func (a *app) setLibrary(files []string) {
 		a.index[p] = i
 	}
 	a.buildQueue()
+	a.refilter()
 
 	if len(files) == 0 {
 		a.stopPlayer()

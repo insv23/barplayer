@@ -27,6 +27,7 @@ type prefs struct {
 	PlayPause  string `json:"playPause"`
 	Previous   string `json:"previous"`
 	Next       string `json:"next"`
+	Search     string `json:"search"`
 }
 
 func defaultPrefs() prefs {
@@ -35,6 +36,7 @@ func defaultPrefs() prefs {
 		PlayPause: "Alt+P",
 		Previous:  "Alt+[",
 		Next:      "Alt+]",
+		Search:    "Alt+\\",
 	}
 }
 
@@ -49,6 +51,7 @@ type prefsFile struct {
 	PlayPause  *string `json:"playPause"`
 	Previous   *string `json:"previous"`
 	Next       *string `json:"next"`
+	Search     *string `json:"search"`
 }
 
 func prefsPath() string {
@@ -86,6 +89,9 @@ func loadPrefs() prefs {
 	}
 	if f.Next != nil {
 		p.Next = *f.Next
+	}
+	if f.Search != nil {
+		p.Search = *f.Search
 	}
 	return p
 }

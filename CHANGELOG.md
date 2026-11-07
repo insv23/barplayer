@@ -8,6 +8,13 @@ English · [简体中文](CHANGELOG_zh.md)
 
 ## [Unreleased]
 
+### Added
+
+- A library window under **Search…**: every track of the folder in a list, a search field that filters by name as you type, a click to play, and the row that plays highlighted. It hides rather than closes, so the app stays in the menu bar.
+- A global shortcut for the library window (`⌥\` by default), shown in the menu and rebindable in the settings window; it opens the window and hides it again while it shows.
+- `⌘W` hides the window frontmost, the settings window included.
+- The menu shows each control's global shortcut on the right.
+
 ## [0.1.0] - 2026-11-07
 
 The first release.

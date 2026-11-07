@@ -27,6 +27,17 @@ type app struct {
 	trayMenu *trayMenu
 	quitting bool
 
+	// searchWin lists the library: query filters the rows by track name,
+	// results holds the rows the query matches, and sel is the row a click
+	// or Enter plays.
+	searchWin   *mygo.Window
+	query       string
+	results     []string
+	searchList  ui.ListState
+	searchInput ui.Handle
+	sel         int
+	reveal      bool
+
 	music   []string
 	index   map[string]int
 	cur     int
@@ -102,6 +113,26 @@ func (a *app) ready() {
 		}
 	})
 
+	// The library window: a field over every track of the folder, for picking
+	// one without stepping through the menu. It hides rather than closes, as
+	// the settings window does.
+	a.searchWin = mygo.NewWindow(mygo.WindowOptions{
+		Title:     current().Search,
+		Width:     520,
+		Height:    560,
+		MinWidth:  380,
+		MinHeight: 320,
+		Hidden:    true,
+		StateKey:  "search",
+		Content:   ui.View(a.searchView),
+	})
+	a.searchWin.OnClose(func(e *mygo.CloseEvent) {
+		if !a.quitting {
+			e.PreventDefault()
+			a.searchWin.Hide()
+		}
+	})
+
 	var err error
 	a.tray, err = mygo.NewTray(mygo.TrayOptions{
 		ID:             "main",
@@ -135,6 +166,7 @@ func (a *app) ready() {
 		a.tray.SetMenu(a.buildMenu())
 		mygo.App.SetMenu(a.buildAppMenu())
 		a.win.SetTitle(current().Settings)
+		a.searchWin.SetTitle(current().Search)
 		a.refresh()
 	})
 
