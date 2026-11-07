@@ -30,13 +30,20 @@ type prefs struct {
 	Search     string `json:"search"`
 }
 
+// defaultShortcuts are the four shortcuts of a fresh install, in the order
+// shortcutList and the settings window list them.
+func defaultShortcuts() []string {
+	return []string{"Alt+P", "Alt+[", "Alt+]", "Alt+\\"}
+}
+
 func defaultPrefs() prefs {
+	s := defaultShortcuts()
 	return prefs{
 		Order:     orderSequential,
-		PlayPause: "Alt+P",
-		Previous:  "Alt+[",
-		Next:      "Alt+]",
-		Search:    "Alt+\\",
+		PlayPause: s[0],
+		Previous:  s[1],
+		Next:      s[2],
+		Search:    s[3],
 	}
 }
 

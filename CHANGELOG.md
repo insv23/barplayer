@@ -14,6 +14,8 @@ English · [简体中文](CHANGELOG_zh.md)
 - A global shortcut for the library window (`⌥\` by default), shown in the menu and rebindable in the settings window; it opens the window and hides it again while it shows.
 - `⌘W` hides the window frontmost, the settings window included.
 - The menu shows each control's global shortcut on the right.
+- A reset button left of each shortcut in the settings window, which puts that one back to the default (`⌥P`, `⌥[`, `⌥]`, `⌥\`). It shows while the row differs from the default.
+- Hover tooltips on the reset and clear buttons beside a shortcut, saying what each one does.
 
 ## [0.1.0] - 2026-11-07
 

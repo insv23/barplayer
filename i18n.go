@@ -23,6 +23,7 @@ type text struct {
 	StartAtLogin, ShowTitle         string
 	Record, Unset, PressKeys, Hint  string
 	Conflict, Tracks, Clear         string
+	ResetDefault                    string
 }
 
 var english = text{
@@ -42,6 +43,8 @@ var english = text{
 	Conflict: "That shortcut is used by another row.",
 	Tracks:   "%d tracks",
 	Clear:    "Clear",
+
+	ResetDefault: "Restore default",
 }
 
 var chinese = text{
@@ -61,6 +64,8 @@ var chinese = text{
 	Conflict: "这个快捷键已被另一项使用。",
 	Tracks:   "%d 首",
 	Clear:    "清除",
+
+	ResetDefault: "恢复默认",
 }
 
 // current returns the table for the language MyGo resolved for the app.

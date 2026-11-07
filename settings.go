@@ -11,6 +11,10 @@ import (
 // button of macOS fields.
 var clearIcon = ui.MustParseSVG([]byte(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>`))
 
+// resetIcon is the counter-clockwise arrow that puts one shortcut back to the
+// app's default.
+var resetIcon = ui.MustParseSVG([]byte(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`))
+
 // settingsView is the one window of the app: language, the four shortcuts,
 // and the two general switches, each as a row with its label on the left.
 func (a *app) settingsView(c *ui.Context) {
@@ -42,10 +46,11 @@ func (a *app) settingsView(c *ui.Context) {
 
 			ui.Spacer(c).Height(6)
 			section(c, L.Shortcuts)
-			a.shortcutRow(c, 0, L.PlayPause, a.p.PlayPause)
-			a.shortcutRow(c, 1, L.Previous, a.p.Previous)
-			a.shortcutRow(c, 2, L.Next, a.p.Next)
-			a.shortcutRow(c, 3, L.Search, a.p.Search)
+			def := defaultShortcuts()
+			a.shortcutRow(c, 0, L.PlayPause, a.p.PlayPause, def[0])
+			a.shortcutRow(c, 1, L.Previous, a.p.Previous, def[1])
+			a.shortcutRow(c, 2, L.Next, a.p.Next, def[2])
+			a.shortcutRow(c, 3, L.Search, a.p.Search, def[3])
 			if a.shortcutErr != "" {
 				ui.Text(c, a.shortcutErr).FontSize(11).TextColor(t.Danger)
 			}
@@ -97,8 +102,10 @@ func section(c *ui.Context, label string) {
 
 // shortcutRow is a recorder field: the keys on the right, centered in a
 // bordered box as the macOS recorders of other apps show them. A click
-// records new ones; the circle clears them.
-func (a *app) shortcutRow(c *ui.Context, i int, label, value string) {
+// records new ones. The row's two icons sit either side of the field, the
+// arrow left of it for the default and the circle right of it for none; each
+// keeps its 18 point slot when it does not show, so the fields line up.
+func (a *app) shortcutRow(c *ui.Context, i int, label, value, def string) {
 	L := current()
 	t := c.Theme()
 	recording := a.recording == i
@@ -107,6 +114,17 @@ func (a *app) shortcutRow(c *ui.Context, i int, label, value string) {
 		Focusable().FocusBind(&a.focusRow, i+1).FocusRing(false).
 		Children(func() {
 			ui.Text(c, label).FontSize(13).Grow(1)
+
+			if value != def && !recording {
+				ui.ButtonBase(c).Width(18).Height(18).Radius(9).Label(L.ResetDefault).
+					Tooltip(L.ResetDefault).
+					OnClick(func() { a.setShortcut(i, def) }).
+					Children(func() {
+						ui.Icon(c, resetIcon).FontSize(13).TextColor(t.TextMuted)
+					})
+			} else {
+				ui.Box(c).Width(18)
+			}
 
 			shown, ink, edge := displayAccel(value), t.Text, t.Border
 			switch {
@@ -124,12 +142,12 @@ func (a *app) shortcutRow(c *ui.Context, i int, label, value string) {
 
 			if value != "" && !recording {
 				ui.ButtonBase(c).Width(18).Height(18).Radius(9).Label(L.Clear).
+					Tooltip(L.Clear).
 					OnClick(func() { a.setShortcut(i, "") }).
 					Children(func() {
 						ui.Icon(c, clearIcon).FontSize(13).TextColor(t.TextMuted)
 					})
 			} else {
-				// The empty slot keeps the fields in one column.
 				ui.Box(c).Width(18)
 			}
 		})
