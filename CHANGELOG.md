@@ -8,6 +8,8 @@ English · [简体中文](CHANGELOG_zh.md)
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-07
+
 ### Added
 
 - A library window under **Search…**: every track of the folder in a list, a search field that filters by name as you type, a click to play, and the row that plays highlighted. It hides rather than closes, so the app stays in the menu bar.
