@@ -8,9 +8,11 @@ English · [简体中文](CHANGELOG_zh.md)
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-25
+
 ### Added
 
-- A **Volume** slider in the settings window: it scales Barplayer's own output from silence to 200% in 10% steps, and is remembered across launches. The system volume keys still change the whole Mac, so music can sit at one level while videos keep theirs. Above 100% a master that already peaks near full scale clips, since the mixer limits at full scale without a limiter.
+- **Volume**: a slider in the settings window that sets the level of what Barplayer plays, from silence to 200% in 10% steps, remembered across launches. A shared system volume cannot give one app its own level: music sits lower than the videos and calls that the system volume is set for, without turning the whole Mac down and back up again. The system volume keys still change everything. Above 100% a master that already peaks near full scale clips, because the mixer limits at full scale and has no limiter.
 
 ## [0.1.1] - 2026-11-07
 

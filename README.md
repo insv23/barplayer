@@ -61,15 +61,15 @@ Defaults: `⌥P` play/pause, `⌥[` previous, `⌥]` next, `⌥\` search. While 
 
 Apple Silicon, macOS 12 or later.
 
-1. Download the disk image from the [latest release](https://github.com/insv23/barplayer/releases/latest/download/barplayer-0.1.1-arm64.dmg).
+1. Download the disk image from the [latest release](https://github.com/insv23/barplayer/releases/latest/download/barplayer-0.1.2-arm64.dmg).
 2. Open it and drag **Barplayer** into `/Applications`.
 3. Check the download against the checksum published with the release:
 
    ```sh
-   shasum -a 256 ~/Downloads/barplayer-0.1.1-arm64.dmg
+   shasum -a 256 ~/Downloads/barplayer-0.1.2-arm64.dmg
    ```
 
-   The value must match `barplayer-0.1.1-arm64.dmg.sha256`.
+   The value must match `barplayer-0.1.2-arm64.dmg.sha256`.
 
 4. **The app is not signed with a Developer ID and not notarized**, so macOS
    quarantines it and refuses the first launch. Remove the flag once:

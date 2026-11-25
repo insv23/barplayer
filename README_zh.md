@@ -62,15 +62,15 @@
 
 仅 Apple Silicon，要求 macOS 12 或更高。
 
-1. 从 [最新版本](https://github.com/insv23/barplayer/releases/latest/download/barplayer-0.1.1-arm64.dmg) 下载磁盘映像。
+1. 从 [最新版本](https://github.com/insv23/barplayer/releases/latest/download/barplayer-0.1.2-arm64.dmg) 下载磁盘映像。
 2. 打开后把 **Barplayer** 拖进 `/Applications`。
 3. 对照 Release 里公布的校验和检查下载：
 
    ```sh
-   shasum -a 256 ~/Downloads/barplayer-0.1.1-arm64.dmg
+   shasum -a 256 ~/Downloads/barplayer-0.1.2-arm64.dmg
    ```
 
-   结果要和 `barplayer-0.1.1-arm64.dmg.sha256` 里的值一致。
+   结果要和 `barplayer-0.1.2-arm64.dmg.sha256` 里的值一致。
 
 4. **这个 app 没有用 Developer ID 签名，也没有公证**，所以 macOS 会隔离它，首次启动会被拒绝。执行一次下面这条去掉隔离标记：
 
