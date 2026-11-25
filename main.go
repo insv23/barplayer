@@ -93,6 +93,9 @@ func (a *app) ready() {
 		mygo.App.SetLocale(a.p.Locale)
 	}
 	audio.SetLatency(audio.LatencyPlayback)
+	// The app's own level, a gain on everything it plays: each new player
+	// for the next track keeps it, and the Mac's volume stays its own.
+	audio.SetVolume(a.p.Volume)
 
 	// A tray icon does not keep the app running, and the app quits when its
 	// last window closes: the settings window exists from the start, hidden.

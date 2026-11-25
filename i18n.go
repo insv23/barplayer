@@ -21,7 +21,7 @@ type text struct {
 	NothingPlaying                  string
 	Language, FollowSystem          string
 	Shortcuts, General              string
-	StartAtLogin, ShowTitle         string
+	StartAtLogin, ShowTitle, Volume string
 	Record, Unset, PressKeys, Hint  string
 	Conflict, Tracks, Clear         string
 	ResetDefault                    string
@@ -39,7 +39,7 @@ var english = text{
 	NothingPlaying: "Not playing",
 	Language:       "Language", FollowSystem: "System",
 	Shortcuts: "Keyboard Shortcuts", General: "General",
-	StartAtLogin: "Start at login", ShowTitle: "Show track name in the menu bar",
+	StartAtLogin: "Start at login", ShowTitle: "Show track name in the menu bar", Volume: "Volume",
 	Record: "Record shortcut", Unset: "Not set", PressKeys: "Press keys…",
 	Hint:     "Click a shortcut to change it · Esc cancels · ⌫ clears",
 	Conflict: "That shortcut is used by another row.",
@@ -61,7 +61,7 @@ var chinese = text{
 	NothingPlaying: "未在播放",
 	Language:       "语言", FollowSystem: "跟随系统",
 	Shortcuts: "快捷键", General: "通用",
-	StartAtLogin: "登录时启动", ShowTitle: "在菜单栏显示曲目名",
+	StartAtLogin: "登录时启动", ShowTitle: "在菜单栏显示曲目名", Volume: "音量",
 	Record: "录制快捷键", Unset: "未设置", PressKeys: "按下按键…",
 	Hint:     "点按快捷键可重新设置 · Esc 取消 · ⌫ 清除",
 	Conflict: "这个快捷键已被另一项使用。",

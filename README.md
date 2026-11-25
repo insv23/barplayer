@@ -45,12 +45,13 @@ The window under **Search…** lists the whole folder. It opens with the field f
 
 ## Settings
 
-The window holds four things, none of them repeating the menu:
+The window holds five things, none of them repeating the menu:
 
 | Item | What it does |
 | --- | --- |
 | Language | System / 简体中文 / English. The switch applies at once, and the system remembers the choice |
 | Shortcuts | Play/pause, previous, next, search: click a field to record, `Esc` cancels, `⌫` clears, and so does the circle on the right |
+| Volume | This app's own level, 0–200% in 10% steps, remembered across launches. It scales only what Barplayer plays; the system volume keys still change the whole Mac |
 | Start at login | Off by default. macOS 13 and later needs a packaged app; under `go tool mygo dev` it does nothing |
 | Show track name in the menu bar | Off by default. On, the title sits beside the icon, cut at 24 characters |
 
@@ -105,7 +106,7 @@ The MyGo in `go.mod` is a **pseudo-version of `main`** (`v0.8.4-0.2026...`), not
 
 | File | Contents |
 | --- | --- |
-| `~/Library/Application Support/Barplayer/prefs.json` | Library folder, play order, include subfolders, menu bar title, language, the four shortcuts |
+| `~/Library/Application Support/Barplayer/prefs.json` | Library folder, play order, include subfolders, menu bar title, app volume, language, the four shortcuts |
 | `~/Library/Application Support/Barplayer/window-state.json` | Position and size of the settings window and the library window |
 
 Development runs and packaged builds share these files (`main.go` calls `SetName("Barplayer")`). Delete `prefs.json` to start over.
@@ -114,7 +115,7 @@ Development runs and packaged builds share these files (`main.go` calls `SetName
 
 - **No tag reading**: a track's name is its file name without the extension (`Artist - Title.mp3` → `Artist - Title`). MyGo decodes no ID3.
 - **Search matches names only**: a case-insensitive substring of the file name, so `Bjork` does not find `Björk`, and the subfolder or tag fields are not searched.
-- **No volume slider**: a menu item cannot hold one, the system volume keys already do the job, and a second gain inside the app would give you two volumes.
+- **The volume is this app's, not the Mac's**: the settings slider scales Barplayer's own output from silence to 200%, while the system volume keys keep changing the whole Mac. Above 100% a loud master clips: MyGo's mixer sums and limits at full scale with no limiter, so a track that peaks near 0 dBFS can crackle, and 100% or below stays clean.
 - **No artwork and no progress**: NSMenu holds text, a subtitle, a 16pt icon, checks and key hints, and nothing else.
 - **About 100 ms between tracks**: each track opens its own player, with no preloading and no crossfade.
 - **Shortcuts do nothing while the tray menu is open**: macOS runs its own loop for an open menu, and delivers neither a global hot key nor a status menu's key equivalents to the app. They answer again once it closes.

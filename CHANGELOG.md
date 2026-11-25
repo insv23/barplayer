@@ -8,6 +8,10 @@ English · [简体中文](CHANGELOG_zh.md)
 
 ## [Unreleased]
 
+### Added
+
+- A **Volume** slider in the settings window: it scales Barplayer's own output from silence to 200% in 10% steps, and is remembered across launches. The system volume keys still change the whole Mac, so music can sit at one level while videos keep theirs. Above 100% a master that already peaks near full scale clips, since the mixer limits at full scale without a limiter.
+
 ## [0.1.1] - 2026-11-07
 
 ### Added

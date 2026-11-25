@@ -19,15 +19,16 @@ const (
 // prefs is what the app remembers between launches. The language is not
 // here: mygo keeps the app's language in the system, through App.SetLocale.
 type prefs struct {
-	Folder     string `json:"folder"`
-	Order      string `json:"order"`
-	Subfolders bool   `json:"subfolders"`
-	ShowTitle  bool   `json:"showTitle"`
-	Locale     string `json:"locale"`
-	PlayPause  string `json:"playPause"`
-	Previous   string `json:"previous"`
-	Next       string `json:"next"`
-	Search     string `json:"search"`
+	Folder     string  `json:"folder"`
+	Order      string  `json:"order"`
+	Subfolders bool    `json:"subfolders"`
+	ShowTitle  bool    `json:"showTitle"`
+	Volume     float64 `json:"volume"`
+	Locale     string  `json:"locale"`
+	PlayPause  string  `json:"playPause"`
+	Previous   string  `json:"previous"`
+	Next       string  `json:"next"`
+	Search     string  `json:"search"`
 }
 
 // defaultShortcuts are the four shortcuts of a fresh install, in the order
@@ -40,6 +41,7 @@ func defaultPrefs() prefs {
 	s := defaultShortcuts()
 	return prefs{
 		Order:     orderSequential,
+		Volume:    1,
 		PlayPause: s[0],
 		Previous:  s[1],
 		Next:      s[2],
@@ -49,16 +51,18 @@ func defaultPrefs() prefs {
 
 // Shortcuts may be cleared, and an empty string is a value of its own, so
 // loading reads them as pointers: absent keeps the default, "" means none.
+// The volume reads the same way: 0 is silence, so a missing key has to mean 1.
 type prefsFile struct {
-	Folder     string  `json:"folder"`
-	Order      string  `json:"order"`
-	Subfolders bool    `json:"subfolders"`
-	ShowTitle  bool    `json:"showTitle"`
-	Locale     string  `json:"locale"`
-	PlayPause  *string `json:"playPause"`
-	Previous   *string `json:"previous"`
-	Next       *string `json:"next"`
-	Search     *string `json:"search"`
+	Folder     string   `json:"folder"`
+	Order      string   `json:"order"`
+	Subfolders bool     `json:"subfolders"`
+	ShowTitle  bool     `json:"showTitle"`
+	Volume     *float64 `json:"volume"`
+	Locale     string   `json:"locale"`
+	PlayPause  *string  `json:"playPause"`
+	Previous   *string  `json:"previous"`
+	Next       *string  `json:"next"`
+	Search     *string  `json:"search"`
 }
 
 func prefsPath() string {
@@ -87,6 +91,9 @@ func loadPrefs() prefs {
 	p.Folder, p.Subfolders, p.ShowTitle, p.Locale = f.Folder, f.Subfolders, f.ShowTitle, f.Locale
 	if f.Order != "" {
 		p.Order = f.Order
+	}
+	if f.Volume != nil {
+		p.Volume = min(max(*f.Volume, 0), 2)
 	}
 	if f.PlayPause != nil {
 		p.PlayPause = *f.PlayPause
